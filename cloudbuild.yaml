@@ -6,28 +6,33 @@ substitutions:
   _REGION: australia-southeast1
   _REPO: family-display
   _IMAGE: family-display-backend
-  _AR_IMAGE: ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest
 
 steps:
   # Build container and tag for Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '${_AR_IMAGE}', '.']
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest'
+      - '.'
 
   # Push image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '${_AR_IMAGE}']
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest'
 
-  # Deploy to Cloud Run (no IAM change here; we’ll set auth in the UI later)
+  # Deploy to Cloud Run (we handle public access in the UI later)
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
       - 'deploy'
       - '${_IMAGE}'
-      - '--image=${_AR_IMAGE}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest'
       - '--region=${_REGION}'
       - '--platform=managed'
-      # comment out to avoid IAM policy error during deploy; enable in UI later
+      # Leave this off to avoid IAM policy errors here; set Invoker in UI if desired:
       # - '--allow-unauthenticated'
 
 images:
-  - '${_AR_IMAGE}'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest'
