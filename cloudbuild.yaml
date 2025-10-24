@@ -1,4 +1,7 @@
 # Cloud Build: build image and deploy to Cloud Run
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/family-display-backend:latest', '.']
